@@ -1,0 +1,8 @@
+node_modules
+dist
+*.tsbuildinfo
+
+# large local video is hosted on Google Drive, never commit it
+*.mp4
+*.mov
+public/birthday-video*
