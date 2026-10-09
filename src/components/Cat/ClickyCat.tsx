@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState } from 'react'
+import { playSound } from '../../audio/useSound'
 import { eggText } from '../../data/easterEggs'
 import { useWorld } from '../../state/DiscoveryContext'
 import { Cat, type CatPose } from './Cat'
@@ -26,15 +27,21 @@ export function ClickyCat({ size = 150, pose = 'sit', hat = false }: { size?: nu
     if (phase !== 'idle') return
     const c = n + 1
     setN(c)
+    playSound('catPoke')
     const lines = eggText.catClicks
     if (c < lines.length) say(lines[c - 1])
     else if (c === lines.length) {
       say(lines[lines.length - 1], 2400)
       setPhase('annoyed')
-      window.setTimeout(() => setPhase('gone'), 1300)
+      playSound('catMeow')
+      window.setTimeout(() => {
+        setPhase('gone')
+        playSound('whooshSoft')
+      }, 1300)
       window.setTimeout(() => {
         setPhase('idle')
         discover('cat')
+        playSound('catPeek')
         say('deal with it.', 2600)
       }, 4600)
     } else say(eggText.catAfter[(c - lines.length - 1) % eggText.catAfter.length])

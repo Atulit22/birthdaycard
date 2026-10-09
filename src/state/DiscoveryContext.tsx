@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { playSound } from '../audio/useSound'
 import { EGGS, type EggId } from '../data/easterEggs'
 
 interface Whisper {
@@ -70,6 +71,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     (id: EggId) => {
       if (foundRef.current.includes(id)) return
       foundRef.current = [...foundRef.current, id]
+      playSound('discover', { variant: Object.keys(EGGS).indexOf(id) })
       setFound(foundRef.current)
       setLastFound(id)
       window.setTimeout(() => say(EGGS[id].reaction, 4200), 700)

@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { useState, type ReactNode } from 'react'
+import { playSound } from '../../audio/useSound'
 
 /** Tap to flip. Both faces share one grid cell so the card is as tall as its tallest face. */
 export function FlipCard({
@@ -26,6 +27,7 @@ export function FlipCard({
         aria-pressed={open}
         onClick={() => {
           setOpen((o) => !o)
+          playSound('paperFlip')
           onFlip?.(!open)
         }}
         whileHover={{ y: -6, rotate: open ? 0 : tilt > 0 ? -1.5 : 1.5 }}

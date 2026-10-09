@@ -5,6 +5,7 @@ import { Fireflies } from '../../components/BirthdayWorld/Ambient'
 import { Cat } from '../../components/Cat/Cat'
 import { StarField } from '../../components/UI/StarField'
 import { content } from '../../data/birthdayContent'
+import { playSound } from '../../audio/useSound'
 import { fx } from '../../fx'
 import { usePrefersReducedMotion } from '../../hooks/useCursor'
 import { useWorld } from '../../state/DiscoveryContext'
@@ -12,7 +13,10 @@ import { useWorld } from '../../state/DiscoveryContext'
 function Envelope({ open, onOpen }: { open: boolean; onOpen: () => void }) {
   return (
     <button
-      onClick={onOpen}
+      onClick={() => {
+        playSound('envelope')
+        onOpen()
+      }}
       aria-label="Open the envelope: For Ishita"
       className="group relative block h-[150px] w-[230px] outline-offset-8 [perspective:900px] sm:h-[190px] sm:w-[290px]"
     >
@@ -52,6 +56,8 @@ export function FinalMessage() {
   const reduced = usePrefersReducedMotion()
   const [open, setOpen] = useState(false)
   const [out, setOut] = useState(false)
+  const [rawrTaps, setRawrTaps] = useState(0)
+  const [ending, setEnding] = useState(false)
   const secRef = useRef<HTMLElement>(null)
   const conRef = useRef<HTMLDivElement>(null)
 
@@ -66,12 +72,35 @@ export function FinalMessage() {
   const blow = () => {
     if (out) return
     setOut(true)
+    playSound('blow')
+    window.setTimeout(() => playSound('success'), 500)
     discover('wish')
     fx.confetti({ x: 0.5, y: 0.6, count: 110, shapes: ['star', 'heart', 'dot'], power: 14 })
     window.setTimeout(() => say(f.wishDone, 5000), 600)
   }
 
   const secrets = found.length + (out ? 0 : 0)
+
+  // "rawr." three times → a P.S.   ·   after the P.S. and the candle, the cat has one more thing
+  const tapRawr = () => {
+    const c = rawrTaps + 1
+    setRawrTaps(c)
+    playSound('tap')
+    if (c === 3) {
+      playSound('sparkle')
+      discover('ps')
+    }
+  }
+  const pokeCat = () => {
+    if (out && found.includes('ps')) {
+      setEnding((e) => !e)
+      if (!found.includes('ending')) {
+        playSound('secretChord')
+        fx.confetti({ x: 0.5, y: 0.5, count: 50, shapes: ['star', 'heart'], power: 9 })
+        discover('ending')
+      } else playSound('moonChime')
+    } else playSound('catPoke')
+  }
 
   return (
     <section
@@ -125,13 +154,30 @@ export function FinalMessage() {
           transition={{ duration: 2 }}
           className="font-display text-xs uppercase tracking-[.4em] text-cream/50"
         >
-          area 08 · the quiet part
+          epilogue · the quiet part
         </motion.p>
 
         {/* cat + envelope */}
         <div className="mt-[22vh] flex flex-col-reverse items-center justify-center gap-6 sm:mt-[26vh] sm:flex-row sm:items-end sm:gap-14">
-          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 1.2 }}>
-            <Cat pose={out ? 'sleep' : 'sit'} size={out ? 170 : 130} blinkDelay={2} />
+          <motion.div className="relative" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 1.2 }}>
+            <AnimatePresence>
+              {ending && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.85 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute bottom-full left-1/2 z-30 mb-2 w-60 -translate-x-1/2 rounded-lg bg-paper p-3 text-center text-ink shadow-2xl"
+                  style={{ rotate: -2 }}
+                >
+                  <p className="text-[10px] uppercase tracking-[.3em] text-wine/70">{f.ending[0]}</p>
+                  <p className="mt-1 font-hand text-2xl leading-[1.1]">{f.ending[1]}</p>
+                  <p className="mt-1 font-hand text-xl text-wine">{f.ending[2]}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <button type="button" aria-label="the cat" onClick={pokeCat} className="block touch-manipulation outline-offset-4">
+              <Cat pose={out ? 'sleep' : 'sit'} size={out ? 170 : 130} blinkDelay={2} />
+            </button>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.3 }}>
             <Envelope open={open} onOpen={() => setOpen(true)} />
@@ -148,26 +194,6 @@ export function FinalMessage() {
               transition={{ duration: 1.2, delay: 0.7 }}
               className="overflow-hidden"
             >
-              <div className="pt-24">
-                <div
-                  className="mx-auto max-w-lg rotate-[-0.8deg] rounded-sm px-7 py-10 text-left text-ink shadow-[0_30px_60px_-10px_rgba(0,0,0,.85)] sm:px-12"
-                  style={{ background: 'repeating-linear-gradient(#fbf3e4 0 35px, #e3d3b6 35px 36px)' }}
-                >
-                  {f.letter.map((p, i) => (
-                    <motion.p
-                      key={i}
-                      initial={{ opacity: 0, y: 14, filter: 'blur(4px)' }}
-                      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                      viewport={{ once: true, amount: 0.8 }}
-                      transition={{ duration: 1, delay: reduced ? 0 : 0.1 }}
-                      className={`font-hand text-[1.65rem] leading-[36px] ${i === 0 ? 'text-wine' : ''}`}
-                    >
-                      {p}
-                    </motion.p>
-                  ))}
-                </div>
-              </div>
-
               <motion.div
                 initial={{ opacity: 0, scale: 0.85 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -183,10 +209,16 @@ export function FinalMessage() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 2.2, duration: 1.2 }}
+                  onClick={tapRawr}
                   className="mt-3 font-hand text-4xl text-gold"
                 >
                   {f.rawr}
                 </motion.p>
+                {found.includes('ps') && (
+                  <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mx-auto mt-3 max-w-xs font-hand text-2xl text-cream/60">
+                    {f.ps}
+                  </motion.p>
+                )}
               </motion.div>
 
               <motion.div

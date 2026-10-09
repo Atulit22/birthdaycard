@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { EGGS } from '../../data/easterEggs'
+import { EGGS, noteOf } from '../../data/easterEggs'
 import { useWorld } from '../../state/DiscoveryContext'
 
 /** "Birthday discoveries: ✦✦✦ ?" — never says how many there are. */
 export function DiscoveryHUD() {
   const { found, lastFound, entered } = useWorld()
   const [open, setOpen] = useState(false)
+  const journal = found.includes('journal')
   if (!entered) return null
   const shown = Math.min(found.length, 7)
   const extra = found.length - shown
@@ -60,13 +61,16 @@ export function DiscoveryHUD() {
             exit={{ opacity: 0, y: -8 }}
             className="w-[min(18rem,86vw)] rounded-2xl border border-gold/30 bg-ink/90 p-4 shadow-2xl backdrop-blur-md"
           >
-            <p className="font-hand text-xl text-gold">things you've found</p>
+            <p className="font-hand text-xl text-gold">{journal ? '📖 the little journal' : "things you've found"}</p>
             <ul className="mt-2 space-y-1 text-sm text-cream/90">
               {found.length === 0 && <li className="text-cream/50">nothing yet. keep looking.</li>}
               {found.map((id) => (
                 <li key={id} className="flex gap-2">
                   <span className="text-gold">✦</span>
-                  {EGGS[id].title}
+                  <span>
+                    {EGGS[id].title}
+                    {journal && noteOf(id) && <span className="block font-hand text-base leading-[1.1] text-cream/50">{noteOf(id)}</span>}
+                  </span>
                 </li>
               ))}
             </ul>

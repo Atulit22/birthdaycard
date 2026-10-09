@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { playSound } from '../../audio/useSound'
 import { useEffect, useRef, useState } from 'react'
 import { fx } from '../../fx'
 import { useWorld } from '../../state/DiscoveryContext'
@@ -51,6 +52,7 @@ export function WishStars({ active }: { active: boolean }) {
 
   const catchIt = (x: number, y: number) => {
     setStar(null)
+    playSound('sparkle')
     fx.confetti({ x: x / window.innerWidth, y: y / window.innerHeight, count: 18, power: 6, shapes: ['star', 'dot'] })
     const n = caught + 1
     setCaught(n)

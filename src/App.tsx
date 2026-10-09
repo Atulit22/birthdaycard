@@ -1,10 +1,14 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
+import { SoundScape } from './audio/SoundScape'
+import { SoundToggle } from './audio/SoundToggle'
+import { SecretWatchers } from './components/EasterEggs/SecretEggs'
 import { KeywordListener } from './components/EasterEggs/Eggs'
 import { CatWhisper } from './components/UI/CatWhisper'
 import { CatRain, ConfettiLayer } from './components/UI/Confetti'
 import { DiscoveryHUD } from './components/UI/DiscoveryHUD'
 import { Cinema } from './sections/Cinema/Cinema'
+import { PartyScene } from './sections/Party/PartyScene'
 import { FinalMessage } from './sections/FinalMessage/FinalMessage'
 import { BirthdayTown } from './sections/BirthdayTown/BirthdayTown'
 import { Gate } from './sections/Intro/Gate'
@@ -44,15 +48,19 @@ export default function App() {
         <BirthdayTown />
         <IshitaCorner />
         <ScrapbookSection />
+        <PartyScene />
         <Cinema />
         {finalUnlocked && <FinalMessage />}
       </motion.main>
 
+      <SoundScape />
+      <SoundToggle />
       <DiscoveryHUD />
       <CatWhisper />
       <ConfettiLayer />
       <CatRain />
       <KeywordListener />
+      <SecretWatchers />
     </>
   )
 }

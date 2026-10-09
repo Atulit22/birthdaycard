@@ -29,26 +29,36 @@ export const content = {
   video: {
     // The full-quality video lives on Google Drive (too big to ship with the site).
     url: 'https://drive.google.com/file/d/1yUzfUMbcvNBkvdqZSMCfQed5Z0zdvjox/view?usp=drive_link',
-    heading: 'Your birthday movie 🎬',
-    eyebrow: 'a little surprise',
-    title: 'One last little thing... 🎁',
-    lines: ['A tiny piece of this whole birthday world,', 'made especially for you.'] as [string, string],
-    button: '🎬 Get Your Birthday Video',
+    eyebrow: 'the finale',
+    pause: ['Before you go...', "There's one last thing."] as [string, string],
+    premiere: "Ishita's birthday premiere",
+    title: 'Your Little Movie',
+    meta: ['9:41', 'one little movie', 'made just for you'],
+    button: '🎬 Watch Your Birthday Movie',
     note: 'The full-quality version is waiting for you.',
-    badge: '✦ made just for you · full quality ✦',
-    tinyEgg: 'shhh. it is a good one.',
+    hint: '(tap the gift)',
+    thanks: 'Your movie is waiting for you ✨',
   },
 
+  // the very first screen, before anything else
   gate: {
-    lines: ['pssst...', "I think there's something here for you."],
-    button: 'Go explore ✦',
+    greeting: 'Hey Ishu.',
+    line2: "So... this is what I've been working on.",
+    line3: 'A tiny world, made just for you.',
+    hidden: "I hid a few things along the way too... let's see if you can find them all 👀",
+    skip: 'skip',
+    button: 'come inside →',
   },
 
   welcome: {
-    eyebrow: 'a tiny world, made for',
+    eyebrow: 'well, here it is.',
+    greeting: ['Happy Birthday,', 'Ishu'],
+    cakeHint: '(go on. tap the cake.)',
+    cakeSong: '♪ happy birthday ♪',
     title: 'Chhotu',
     lines: ['okay good. you came.', 'scroll slowly.', 'some things in here are hiding.'],
     scrollHint: 'psst — keep going down',
+    hidden: 'I hid a few little things for you throughout this... let’s see if you can find all of them 👀', // ✏️
   },
 
   // What the little cat says the first time you reach each area
@@ -149,6 +159,28 @@ export const content = {
   scrapbook: {
     title: 'A few things worth remembering...',
     sub: 'tap the little pieces of paper',
+    // the front sides of a few cards (their old text lives on in `items` below, on the back)
+    extra: {
+      catEmergency: {
+        label: 'EMERGENCY',
+        ask: 'Having a bad day?',
+        lines: ['Then this is your emergency black cat.', 'Stare at it until life feels at least 2% better.'],
+        taps: ['stare. just stare.', 'better?', '...2% better?', 'okay. 3%.', 'EMERGENCY LEVEL: MAXIMUM'],
+        slip: 'the official announcement ↓',
+      },
+      dontForget: ["You're doing better than you think.", 'Take a breath.', 'Drink some water.', 'And remember that bad days don’t get to define you.'],
+      dontForgetHint: 'turn me over ↻',
+      knock: {
+        idle: 'knock knock',
+        hint: '(go on. knock.)',
+        who: "Who's there?",
+        reply: 'Someone who wanted to make sure you smiled today.',
+        cat: '...and a very small black cat. Rawr.',
+        again: '(knock again)',
+      },
+      tape: 'psst. the tape is reusable.',
+      underside: ['(i wrote on the table too)', 'hi. nobody looks down here.'],
+    },
     items: [
       {
         id: 's1',
@@ -221,6 +253,12 @@ export const content = {
       'Anyway. I hope this year is soft where it needs to be and loud where it should be.',
       'Thank you for being you. Seriously.',
     ],
+    // the letter on the party table (Area 08). Paragraphs are `letter` above (the first line, "Dear Ishita,", is replaced by this greeting)
+    letterGreeting: 'Hey Ishu,',
+    letterPs: 'P.S. everyone at the party is here because of you. I only built the invitation. (and yes, a few things are still hiding. keep looking.)', // ✏️
+    letterSign: '— from the guy who made all this for you ❤️',
+    letterTag: 'for Ishu',
+    letterClose: 'fold it back ↩',
     signoff: 'Happy Birthday, Ishita ❤️',
     rawr: 'rawr.',
     wishPrompt: 'one more thing — make a wish, then blow out the candle',
@@ -228,5 +266,8 @@ export const content = {
     // {n} gets replaced with the number of secrets she found
     secretsLine: 'you found {n} secrets. there were more.',
     restart: 'Take me back to the beginning ↑',
+    // hidden: tap "rawr." three times, then wake the cat after blowing out the candle
+    ps: 'P.S. you are not done yet. look at the cat.',
+    ending: ['the actual last thing:', 'Happy birthday, chhotu. I am really glad you exist.', '— rawr. (the cat agrees)'], // ✏️
   },
 }

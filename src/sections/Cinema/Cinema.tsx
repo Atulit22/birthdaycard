@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useInView } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { playSound } from '../../audio/useSound'
 import { Popcorn } from '../../components/BirthdayWorld/art'
 import { Cat } from '../../components/Cat/Cat'
 import { Poppable } from '../../components/UI/Poppable'
@@ -45,18 +46,25 @@ export function Cinema() {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(videoDone ? 3 : 0)
   const [party, setParty] = useState(0)
+  const [stub, setStub] = useState(0) // taps on the ticket
+  const [dim, setDim] = useState(false) // lights go down for the finale
   const timers = useRef<number[]>([])
   useWhisperOnView(secRef, content.areaWhispers.cinema)
 
   useEffect(() => {
     if (!seen) return
-    const t = window.setTimeout(() => setOpen(true), 500)
+    const t = window.setTimeout(() => {
+      setOpen(true)
+      playSound('curtain')
+      playSound('projector')
+    }, 500)
     return () => window.clearTimeout(t)
   }, [seen])
   useEffect(() => () => timers.current.forEach(window.clearTimeout), [])
 
   const ended = () => {
     markVideoDone()
+    playSound('success')
     setParty((p) => p + 1)
     fx.confetti({ x: 0.5, y: 0.7, count: 140, power: 16 })
     timers.current.push(window.setTimeout(() => fx.confetti({ x: 0.1, y: 0.9, count: 70, spread: 1, power: 17 }), 350))
@@ -70,6 +78,7 @@ export function Cinema() {
   }
 
   const follow = () => {
+    playSound('whoosh')
     unlockFinal()
     window.setTimeout(() => document.getElementById('final')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }), 120)
   }
@@ -79,8 +88,10 @@ export function Cinema() {
     <section ref={secRef} id="cinema" className="relative overflow-hidden bg-gradient-to-b from-[#3a1a3f] via-[#2a0d18] to-[#120a14] px-4 pb-32 pt-28 sm:px-8">
       <StarField count={60} seed={33} height={1800} className="opacity-60" />
       <Celebration fireKey={party} />
+      <div className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-[2500ms]" style={{ opacity: dim ? 0.5 : 0 }} aria-hidden />
 
       <div className="relative mx-auto max-w-4xl">
+        <div className="transition-opacity duration-[2500ms]" style={{ opacity: dim ? 0.3 : 1 }}>
         {/* marquee */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -89,7 +100,7 @@ export function Cinema() {
           transition={{ duration: 0.9 }}
           className="relative mx-auto max-w-2xl rounded-xl border-4 border-gold/80 bg-ink px-4 py-5 text-center shadow-[0_0_70px_rgba(226,182,89,.3)] sm:px-8"
         >
-          <p className="mb-2 font-display text-[10px] uppercase tracking-[.45em] text-cream/50">area 07 · now showing</p>
+          <p className="mb-2 font-display text-[10px] uppercase tracking-[.45em] text-cream/50">now showing</p>
           <Bulbs />
           <h2 className="my-4 font-display text-[clamp(1.6rem,6.2vw,3.4rem)] font-bold tracking-[.12em] text-gold [text-shadow:0_0_24px_rgba(226,182,89,.7)]">
             {cin.marquee}
@@ -107,11 +118,24 @@ export function Cinema() {
             initial={{ rotate: -12, opacity: 0 }}
             whileInView={{ rotate: -7, opacity: 1 }}
             viewport={{ once: true }}
+            onClick={() => {
+              const c = stub + 1
+              setStub(c)
+              playSound('paperRustle')
+              if (c === 3) discover('ticket')
+            }}
             className="relative w-36 rounded-md bg-paper px-4 py-3 text-center text-ink shadow-xl before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-4 before:-translate-y-1/2 before:rounded-full before:bg-[#2a0d18] after:absolute after:-right-2 after:top-1/2 after:h-4 after:w-4 after:-translate-y-1/2 after:rounded-full after:bg-[#2a0d18]"
           >
-            <p className="font-display text-[11px] font-bold tracking-[.3em] text-wine">{cin.ticket[0]}</p>
-            <p className="font-hand text-3xl leading-none">{cin.ticket[1]}</p>
-            <p className="mt-1 border-t border-dashed border-ink/30 pt-1 text-[10px] uppercase tracking-widest text-ink/50">{cin.ticket[2]}</p>
+            {(() => {
+              const t = stub >= 3 ? eggText.ticket : cin.ticket
+              return (
+                <>
+                  <p className="font-display text-[11px] font-bold tracking-[.3em] text-wine">{t[0]}</p>
+                  <p className="font-hand text-3xl leading-none">{t[1]}</p>
+                  <p className="mt-1 border-t border-dashed border-ink/30 pt-1 text-[10px] uppercase tracking-widest text-ink/50">{t[2]}</p>
+                </>
+              )
+            })()}
           </motion.div>
           <div className="relative h-[90px] w-[72px]">
             <Poppable
@@ -127,6 +151,7 @@ export function Cinema() {
             </Poppable>
           </div>
         </div>
+        </div>
 
         {/* the screen */}
         <div ref={stageRef} className="relative mt-16">
@@ -135,31 +160,13 @@ export function Cinema() {
               {open && (
                 <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.9 }}>
                   <p className="font-hand text-3xl text-gold sm:text-4xl">{cin.found}</p>
-                  <motion.h3
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 2.0, duration: 1 }}
-                    className="mt-1 font-display text-3xl font-bold italic text-cream sm:text-5xl"
-                  >
-                    {content.video.heading}
-                  </motion.h3>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           <div className="relative">
-            <VideoGift
-              eyebrow={content.video.eyebrow}
-              title={content.video.title}
-              lines={content.video.lines}
-              button={content.video.button}
-              note={content.video.note}
-              badge={content.video.badge}
-              href={content.video.url}
-              tinyEgg={content.video.tinyEgg}
-              onOpen={ended}
-            />
+            <VideoGift {...content.video} href={content.video.url} play={open} instant={videoDone} onLights={setDim} onOpen={ended} />
             {/* curtains */}
             <div className={`pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-2xl transition-opacity duration-500 ${open ? 'opacity-0 delay-[1900ms]' : ''}`}>
               <Curtain side="l" open={open} />

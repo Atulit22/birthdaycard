@@ -1,10 +1,16 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { useEffect } from 'react'
+import { playSound } from '../../audio/useSound'
 import { Cat } from '../Cat/Cat'
 import { useWorld } from '../../state/DiscoveryContext'
 
 /** The companion that lives at the bottom edge of the screen and pops up to comment on things. */
 export function CatWhisper() {
   const { whisper, entered } = useWorld()
+  const key = whisper?.key
+  useEffect(() => {
+    if (key) playSound('catPeek')
+  }, [key])
   if (!entered) return null
   return (
     <div className="pointer-events-none fixed bottom-0 left-2 z-[70] flex items-end gap-1 sm:left-5" aria-live="polite">

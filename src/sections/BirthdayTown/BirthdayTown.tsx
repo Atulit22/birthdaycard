@@ -1,15 +1,18 @@
 import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'motion/react'
 import { useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react'
+import { playSound } from '../../audio/useSound'
 import { Balloon, Bush, Cloud, Flower, GrassTuft, House, Moon, PawPrint, Present, Tree } from '../../components/BirthdayWorld/art'
 import { Clouds, Fireflies, Parallax } from '../../components/BirthdayWorld/Ambient'
 import { pos, type Pos } from '../../components/BirthdayWorld/spot'
 import { CatWalk } from '../../components/Cat/CatWalk'
 import { ClickyCat } from '../../components/Cat/ClickyCat'
 import { HiddenCat, HiddenRawr, Lanterns, MysteryPresent, SecretRock, TinyStar } from '../../components/EasterEggs/Eggs'
+import { FallenNote, MouseHole, PopBalloons } from '../../components/EasterEggs/SecretEggs'
 import { WishStars } from '../../components/EasterEggs/WishStars'
 import { Poppable } from '../../components/UI/Poppable'
 import { StarField } from '../../components/UI/StarField'
 import { content } from '../../data/birthdayContent'
+import { fx } from '../../fx'
 import { eggText } from '../../data/easterEggs'
 import { useWhisperOnView } from '../../hooks/useWhisperOnView'
 import { useWorld } from '../../state/DiscoveryContext'
@@ -49,8 +52,10 @@ function Floater({ at, delay = 0, dur = 6, children }: { at: Pos; delay?: number
   )
 }
 
-const AreaLabel = ({ n }: { n: string }) => (
-  <div className="absolute inset-x-0 top-5 text-center font-display text-xs uppercase tracking-[.4em] text-cream/55">area {n}</div>
+const AreaLabel = ({ n, hint }: { n: string; hint?: string }) => (
+  <div title={hint} className="absolute inset-x-0 top-5 text-center font-display text-xs uppercase tracking-[.4em] text-cream/55">
+    area {n}
+  </div>
 )
 
 /** A little cat that trots along island #1, but only while you scroll. */
@@ -80,10 +85,14 @@ function CozyHouse() {
     <Poppable
       label="a little house with a door — knock?"
       {...pos({ m: [36, 6], d: [30, 6] })}
-      text={knocks > 0 ? eggText.house.knock[Math.min(knocks - 1, 2)] : null}
+      text={knocks > 0 ? eggText.houseKnock[Math.min(knocks - 1, eggText.houseKnock.length - 1)] : null}
       onPop={(n) => {
         setKnocks(n)
         if (n === 3) discover('house')
+        if (n === 6) {
+          playSound('secretChord')
+          discover('resident')
+        }
       }}
     >
       <div className="relative">
@@ -108,6 +117,17 @@ export function BirthdayTown() {
   const inView = useInView(ref, { amount: 0.08 })
   useWhisperOnView(isle1, content.areaWhispers.town)
   const { town } = content
+  const { discover } = useWorld()
+  const [bloom, setBloom] = useState([false, false, false])
+  const bloomIt = (i: number) => {
+    const next = bloom.map((b, j) => b || j === i)
+    setBloom(next)
+    if (next.every(Boolean) && !bloom.every(Boolean)) {
+      playSound('sparkle')
+      fx.confetti({ x: 0.3, y: 0.6, count: 24, power: 7, shapes: ['heart'], spread: 1.2 })
+      discover('bouquet')
+    }
+  }
   const prints = [6, 13, 20, 27, 34, 41, 48, 55]
 
   return (
@@ -136,7 +156,7 @@ export function BirthdayTown() {
         {/* ───────── ISLAND 1 — sunset, a house, balloons ───────── */}
         <div ref={isle1}>
           <Island align="left" tone="dusk">
-            <AreaLabel n="02" />
+            <AreaLabel n="02" hint="(some balloons are heavier than they look)" />
             <Prop at={{ m: [16, 4], d: [10, 2] }}>
               <Board>
                 {town.welcomeSign[0]}
@@ -147,15 +167,14 @@ export function BirthdayTown() {
             <Prop at={{ m: [62, 8], d: [29, 8] }}>
               <House size={170} wall="#ecd9bd" roof="#8c1c2c" />
             </Prop>
-            <Floater at={{ m: [74, 122], d: [34, 158] }} dur={5}>
-              <Balloon color="#b3202f" size={34} />
-            </Floater>
-            <Floater at={{ m: [81, 138], d: [37, 176] }} delay={0.8} dur={6}>
-              <Balloon color="#e2b659" size={34} />
-            </Floater>
-            <Floater at={{ m: [88, 118], d: [40, 150] }} delay={1.4} dur={7}>
-              <Balloon color="#f4b6c8" size={34} />
-            </Floater>
+            <PopBalloons
+              items={[
+                { at: { m: [74, 122], d: [34, 158] }, color: '#b3202f', dur: 5 },
+                { at: { m: [81, 138], d: [37, 176] }, color: '#e2b659', delay: 0.8, dur: 6 },
+                { at: { m: [88, 118], d: [40, 150] }, color: '#f4b6c8', delay: 1.4, dur: 7 },
+              ]}
+            />
+            <FallenNote at={{ m: [46, -8], d: [44, -10] }} />
 
             <Prop at={{ m: [0, 0], d: [50, 6], hm: true }}>
               <Tree canopy="#e89ab4" light="#f6bfd0" trunk="#4a2c3a" size={130} />
@@ -166,7 +185,7 @@ export function BirthdayTown() {
               { c: '#e2b659', p: { m: [40, -8], d: [66, -8] } },
               { c: '#c9a6e8', p: { m: [24, -6], d: [71, 5] } },
             ].map((f, i) => (
-              <Poppable key={i} label="a flower" lines={town.flowerLines} {...pos(f.p as Pos)}>
+              <Poppable key={i} label="a flower" lines={town.flowerLines} onPop={() => bloomIt(i)} {...pos(f.p as Pos)}>
                 <Flower color={f.c} size={46} style={{ animationDelay: `${i * 0.7}s` }} />
               </Poppable>
             ))}
@@ -191,7 +210,7 @@ export function BirthdayTown() {
         {/* ───────── ISLAND 2 — the path: lanterns & secrets ───────── */}
         <div className="mt-4 md:mt-8">
           <Island align="right" tone="dusk">
-            <AreaLabel n="03" />
+            <AreaLabel n="03" hint="(where the tree meets the grass)" />
 
             {prints.map((x, i) => (
               <motion.span
@@ -213,7 +232,14 @@ export function BirthdayTown() {
               <Tree size={150} canopy="#3f6650" light="#55806a" />
             </Prop>
 
-            <Poppable label="a wooden sign" lines={town.signLines} {...pos({ m: [27, 6], d: [24, 6] })}>
+            <Poppable
+              label="a wooden sign"
+              lines={eggText.sign}
+              onPop={(n) => {
+                if (n === 6) discover('sign')
+              }}
+              {...pos({ m: [27, 6], d: [24, 6] })}
+            >
               <Board>
                 <span className="block text-2xl">→</span>
               </Board>
@@ -227,6 +253,7 @@ export function BirthdayTown() {
             </Prop>
 
             <MysteryPresent {...pos({ m: [86, 2], d: [84, 2] })} />
+            <MouseHole at={{ m: [34, -16], d: [31, -16] }} />
 
             <HiddenRawr {...pos({ m: [44, -24], d: [36, -24] })} />
             <Prop at={{ m: [14, -16], d: [17, -16] }}>
@@ -238,7 +265,7 @@ export function BirthdayTown() {
         {/* ───────── ISLAND 3 — night, a quiet house, the way down ───────── */}
         <div className="mt-4 md:mt-8">
           <Island align="left" tone="night">
-            <AreaLabel n="04" />
+            <AreaLabel n="04" hint="(knock louder)" />
             <CozyHouse />
             <Prop at={{ m: [0, 0], d: [14, 6], hm: true }}>
               <Tree size={140} canopy="#2f5a47" light="#43745c" trunk="#2a1d36" />

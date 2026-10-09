@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { playSound } from '../../audio/useSound'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { eggText } from '../../data/easterEggs'
 import { fx } from '../../fx'
@@ -102,6 +103,7 @@ export function TinyStar({ className = '' }: { className?: string }) {
         aria-label="a tiny star"
         onClick={() => {
           setOpen((o) => !o)
+          playSound('sparkle')
           discover('star')
         }}
         className="grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center"
@@ -151,6 +153,7 @@ export function HiddenRawr({ className = '', style }: { className?: string; styl
         setRoar((r) => r + 1)
         setText(eggText.rawr.bubble)
         fx.shake()
+        playSound('catMeow')
         discover('rawr')
       }}
     >
@@ -228,9 +231,15 @@ export function KeywordListener() {
     if (!entered) return
     const h = (e: KeyboardEvent) => {
       if (e.key.length !== 1) return
-      buf.current = (buf.current + e.key.toLowerCase()).slice(-4)
-      if (buf.current === 'meow') {
+      buf.current = (buf.current + e.key.toLowerCase()).slice(-8)
+      if (buf.current.endsWith('squirtle')) {
+        playSound('splash')
+        for (const x of [0.25, 0.5, 0.75]) fx.confetti({ x, y: 0.85, count: 22, power: 13, shapes: ['dot'], spread: 0.9 })
+        discover('squirtle')
+        buf.current = ''
+      } else if (buf.current.endsWith('meow')) {
         fx.catRain()
+        playSound('catMeow')
         discover('meow')
         buf.current = ''
       }

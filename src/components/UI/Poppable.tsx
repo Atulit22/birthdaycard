@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { playSound } from '../../audio/useSound'
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 interface Props {
@@ -56,6 +57,7 @@ export function Poppable({
 
   const click = () => {
     count.current += 1
+    playSound('pop')
     if (lines.length) show(lines[Math.min(count.current - 1, lines.length - 1)] ?? lines[(count.current - 1) % lines.length])
     onPop?.(count.current)
   }
