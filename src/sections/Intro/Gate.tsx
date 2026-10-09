@@ -7,6 +7,8 @@ import { Cat } from '../../components/Cat/Cat'
 import { StarField } from '../../components/UI/StarField'
 import { content } from '../../data/birthdayContent'
 import { eggText } from '../../data/easterEggs'
+import { fx } from '../../fx'
+import { haptic, useIsTouch } from '../../hooks/useTouch'
 import { usePrefersReducedMotion } from '../../hooks/useCursor'
 import { useWorld } from '../../state/DiscoveryContext'
 
@@ -43,6 +45,7 @@ export function Gate() {
   const [pokes, setPokes] = useState(0) // the streetlight
   const [cats, setCats] = useState(0) // the cat
   const [entering, setEntering] = useState(false)
+  const touch = useIsTouch()
 
   useEffect(() => {
     if (step >= 5) return
@@ -198,6 +201,18 @@ export function Gate() {
             transition={{ delay: 0.6, duration: 1.4 }}
           >
             <AnimatePresence mode="wait">
+              {cats === 0 && step >= 2 && !entering && (
+                <motion.p
+                  key="hint"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: [0, -4, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, y: { duration: 2.4, repeat: Infinity } }}
+                  className="pointer-events-none absolute -top-10 left-1/2 z-10 w-max max-w-[78vw] -translate-x-1/2 text-center font-hand text-xl leading-none text-gold [text-shadow:0_0_12px_rgba(226,182,89,.6)]"
+                >
+                  {touch ? g.hintTap : g.hintClick}
+                </motion.p>
+              )}
               {cats > 0 && cats <= 3 && (
                 <motion.p
                   key={cats}
@@ -217,6 +232,11 @@ export function Gate() {
                 const c = cats + 1
                 setCats(c)
                 playSound('catPoke')
+                haptic(10)
+                if (c === 1) {
+                  playSound('sparkle')
+                  fx.confetti({ x: 0.62, y: 0.66, count: 10, power: 5, shapes: ['heart'], spread: 1.2 })
+                }
                 if (c === 2) setPokes((p) => Math.max(p, 3)) // the lamp flickers, the cat blames it
                 if (c === 3) discover('gateCat')
               }}

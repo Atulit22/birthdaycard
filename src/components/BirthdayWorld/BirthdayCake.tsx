@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
 /** A two-tier cake with three candles. `playing` makes the flames dance faster and flare. */
-export function BirthdayCake({ size = 230, playing = false, reduced = false }: { size?: number; playing?: boolean; reduced?: boolean }) {
+export function BirthdayCake({ size = 230, playing = false, reduced = false, lit = true }: { size?: number; playing?: boolean; reduced?: boolean; lit?: boolean }) {
   const candles = [
     { x: 84, c: '#f4b6c8' },
     { x: 110, c: '#e2b659' },
@@ -45,11 +45,13 @@ export function BirthdayCake({ size = 230, playing = false, reduced = false }: {
         <g key={c.x}>
           <rect x={c.x - 4} y="42" width="8" height="32" rx="2" fill={c.c} />
           <path d={`M${c.x - 4} 50 l8 5 M${c.x - 4} 59 l8 5`} stroke="#fff" strokeOpacity=".55" strokeWidth="2" />
+          {lit && (
           <g style={flame(i)}>
             <ellipse cx={c.x} cy="32" rx={playing ? 14 : 11} ry={playing ? 17 : 13} fill="#ffd98a" opacity={playing ? 0.42 : 0.28} />
             <path d={`M${c.x} 20 C ${c.x - 7} 29, ${c.x - 7} 38, ${c.x} 40 C ${c.x + 7} 38, ${c.x + 7} 29, ${c.x} 20Z`} fill="#ffb347" />
             <path d={`M${c.x} 28 C ${c.x - 3} 33, ${c.x - 3} 37, ${c.x} 38 C ${c.x + 3} 37, ${c.x + 3} 33, ${c.x} 28Z`} fill="#fff3cf" />
           </g>
+          )}
         </g>
       ))}
     </svg>

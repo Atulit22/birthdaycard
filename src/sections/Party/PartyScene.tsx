@@ -9,7 +9,9 @@ import { LetterOverlay, TableEnvelope } from '../../components/Party/LetterObjec
 import { Hero, Ishu, Me, Turtle } from '../../components/Party/PartyCast'
 import { StarField } from '../../components/UI/StarField'
 import { fx } from '../../fx'
+import { content } from '../../data/birthdayContent'
 import { usePrefersReducedMotion } from '../../hooks/useCursor'
+import { haptic } from '../../hooks/useTouch'
 import { useWorld } from '../../state/DiscoveryContext'
 
 /* AREA 08 — everyone comes to the party.
@@ -30,6 +32,30 @@ function At({ dx = 0, y = 0, w, z = 10, children, className = '', style }: { dx?
   return (
     <div className={`absolute ${className}`} style={{ left: `calc(50% + ${U(dx)})`, bottom: `calc(var(--gy) + ${U(y)})`, width: U(w), zIndex: z, transform: 'translateX(-50%)', ...style }}>
       {children}
+    </div>
+  )
+}
+
+/** a person (or rock) you can poke: they answer with a line, a sound, and a tiny bounce */
+function Talk({ label, lines, sound = 'giggle', children }: { label: string; lines: string[]; sound?: 'giggle' | 'tap' | 'pop'; children: ReactNode }) {
+  const { say, bubble } = useSay()
+  const n = useRef(0)
+  return (
+    <div className="relative">
+      {bubble}
+      <button
+        type="button"
+        aria-label={label}
+        onClick={() => {
+          say(lines[n.current % lines.length], 2600)
+          n.current += 1
+          playSound(sound)
+          haptic(8)
+        }}
+        className="block w-full touch-manipulation outline-offset-4 transition-transform active:scale-[.97]"
+      >
+        {children}
+      </button>
     </div>
   )
 }
@@ -109,6 +135,7 @@ export function PartyScene() {
   const [letter, setLetter] = useState<{ rect: DOMRect } | null>(null)
   const [letterSeen, setLetterSeen] = useState(false)
   const letterRef = useRef(false)
+  const [focus, setFocus] = useState('50% 60%') // where the camera leans in when the letter opens (kept after closing so it eases back out the same way)
 
   const celebrate = () => {
     setCele(true)
@@ -128,19 +155,23 @@ export function PartyScene() {
   }
 
   // the letter: lift the envelope toward the camera; the party dims and goes quiet behind it, then comes back
+  // NOTE: opening the letter never touches the page's scrolling (no overflow/position changes, no body classes, no scroll jumps)
   const openLetter = (rect: DOMRect) => {
     letterRef.current = true
+    // the "camera" leans in toward where the envelope is on the stage
+    const s = stage.current?.getBoundingClientRect()
+    if (s) setFocus(`${rect.left + rect.width / 2 - s.left}px ${rect.top + rect.height / 2 - s.top}px`)
     setLetter({ rect })
     setLetterSeen(true)
     audio.setPartyLevel(4)
     playSound('envelope')
-    document.documentElement.classList.add('locked')
+    playSound('sparkle')
+    fx.confetti({ x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height / 2) / window.innerHeight, count: 10, power: 4, shapes: ['star'], spread: 1.4 })
   }
   const closeLetter = () => {
     if (!letterRef.current) return
     letterRef.current = false
     setLetter(null)
-    document.documentElement.classList.remove('locked')
     audio.setPartyLevel(level.current)
     // nothing was reset — and everyone is happy again
     window.setTimeout(() => {
@@ -149,12 +180,6 @@ export function PartyScene() {
       setBurst((b) => b + 1)
     }, 650)
   }
-  useEffect(
-    () => () => {
-      document.documentElement.classList.remove('locked')
-    },
-    [],
-  )
 
   useMotionValueEvent(p, 'change', (v) => {
     if (reduced) return
@@ -206,7 +231,7 @@ export function PartyScene() {
         style={{ ['--u' as string]: 'min(12.5vw, 11svh)', ['--gy' as string]: '15%' }}
       >
         {/* everything in the party sits inside this, so the letter can soften and darken it all at once */}
-        <motion.div className="absolute inset-0" style={{ transformOrigin: '50% 60%' }} animate={{ filter: letter ? 'blur(2.5px) brightness(.55)' : 'blur(0px) brightness(1)', scale: letter ? 1.05 : 1 }} transition={{ duration: 0.9, ease: 'easeInOut' }}>
+        <motion.div className="absolute inset-0" style={{ transformOrigin: focus }} animate={{ filter: letter ? 'blur(2.5px) brightness(.55)' : 'blur(0px) brightness(1)', scale: letter ? 1.14 : 1 }} transition={{ duration: 0.9, ease: 'easeInOut' }}>
         {/* ───────────── BACKGROUND ───────────── */}
         <motion.div className="absolute inset-0" style={{ scale: reduced ? 1 : zBg, transformOrigin: origin }}>
           <div className="absolute inset-0" style={{ background: 'linear-gradient(#0c0616 0%, #241039 34%, #4f2152 58%, #8a3a62 76%, #d0687a 90%)' }} />
@@ -302,14 +327,18 @@ export function PartyScene() {
           <At dx={0} y={2.2} w={2.9} z={10}>
             <Sparkles on={cele} />
             <div style={{ ['--bh' as string]: '-3px', animation: reduced ? undefined : `bodyBob ${cele ? 0.55 : 2.4}s ease-in-out infinite` }}>
-              <Ishu celebrating={cele} className="h-auto w-full" />
+              <Talk label="Ishu" lines={content.partyTalk.ishu}>
+                <Ishu celebrating={cele} className="h-auto w-full" />
+              </Talk>
             </div>
           </At>
 
           {/* me — right beside her, clapping */}
           <At dx={-2.55} y={2.1} w={2.7} z={9}>
             <Person lk={lkL} lean={leanL} bob={1.7} delay={0.4} cele={cele}>
-              <Me celebrating={cele} className="h-auto w-full" />
+              <Talk label="the guy who made this" lines={content.partyTalk.me} sound="tap">
+                <Me celebrating={cele} className="h-auto w-full" />
+              </Talk>
             </Person>
           </At>
 
@@ -340,7 +369,9 @@ export function PartyScene() {
           </At>
           <At dx={4.05} y={-0.15} w={0.95} z={31}>
             <div style={{ animation: reduced ? undefined : 'wobble 3.2s ease-in-out infinite', transformOrigin: '50% 100%' }}>
-              <Rock size={200} mood={cele ? 'cry' : 'plain'} className="h-auto w-full" />
+              <Talk label="a rock with a party hat" lines={content.partyTalk.rock} sound="pop">
+                <Rock size={200} mood={cele ? 'cry' : 'plain'} className="h-auto w-full" />
+              </Talk>
             </div>
             <span className="absolute -top-[22%] left-[8%] w-[84%]" aria-hidden>
               <svg viewBox="0 0 40 26" className="w-full"><path d="M4 22 L20 2 L36 22Z" fill="#e2b659" /><circle cx="20" cy="2" r="3" fill="#f4b6c8" /></svg>
@@ -395,11 +426,11 @@ export function PartyScene() {
             tabIndex={cueOn ? 0 : -1}
             onClick={() => {
               playSound('whooshSoft')
-              document.getElementById('cinema')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+              document.getElementById('final')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
             }}
             className="rounded-full border border-gold/50 bg-ink/60 px-6 py-3 font-hand text-2xl text-cream backdrop-blur transition hover:border-gold hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
           >
-            one last little thing... 🎬
+            {content.final.partyCue}
           </button>
         </motion.div>
       </div>
@@ -418,10 +449,17 @@ function Person({ children, lk, lean, bob, delay = 0, cele, hop = false }: { chi
 
 /** the little turtle: always dancing; five taps and he gets a very big idea */
 function TurtleGuest({ lk, lean, cele, burst, reduced }: { lk: MotionValue<number>; lean: MotionValue<number>; cele: boolean; burst: number; reduced: boolean }) {
-  const { discover } = useWorld()
+  const { discover, found } = useWorld()
   const { say, bubble } = useSay()
   const [n, setN] = useState(0)
   const [spin, setSpin] = useState(0)
+  // if the flags are still unexplored a while after the big moment, the turtle drops a hint
+  useEffect(() => {
+    if (!cele || found.includes('partyRawr')) return
+    const t = window.setTimeout(() => say(content.hints.turtle, 3600), 9000)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cele])
   const cool = n >= 5
   return (
     <div className="relative">
@@ -491,9 +529,24 @@ function HangingHero({ cele, burst, lk, reduced }: { cele: boolean; burst: numbe
 
 /** The party table: cake, candles, gifts, treats, popcorn — and a mouse with a very small sign. */
 function Table({ cele, reduced }: { cele: boolean; reduced: boolean }) {
-  const { discover } = useWorld()
+  const { discover, say: whisper } = useWorld()
   const { say, bubble } = useSay()
   const [taps, setTaps] = useState(0)
+  const [lit, setLit] = useState(true)
+  const relight = useRef(0)
+  useEffect(() => () => window.clearTimeout(relight.current), [])
+  const blowOut = () => {
+    if (!lit) return
+    setLit(false)
+    haptic(12)
+    playSound('blow')
+    discover('wish')
+    whisper(content.final.wishDone, 4200)
+    relight.current = window.setTimeout(() => {
+      setLit(true)
+      playSound('sparkle')
+    }, 5500)
+  }
   const stolen = taps >= 3
   return (
     <>
@@ -511,7 +564,9 @@ function Table({ cele, reduced }: { cele: boolean; reduced: boolean }) {
       <At dx={0} y={2.3} w={1.7} z={25}>
         <div className="relative">
           <div className="absolute -inset-x-[40%] -top-[10%] bottom-[30%] rounded-full bg-[radial-gradient(closest-side,rgba(255,210,140,.5),transparent)] blur-md" />
-          <BirthdayCake size={400} playing={cele} reduced={reduced} />
+          <button type="button" aria-label="the birthday cake — blow out the candles?" onClick={blowOut} className="hit block w-full touch-manipulation outline-offset-4">
+            <BirthdayCake size={400} playing={cele && lit} lit={lit} reduced={reduced} />
+          </button>
           {/* a slice you'd notice missing */}
           {!stolen && <span aria-hidden className="absolute bottom-[10%] right-[18%] h-[12%] w-[14%] bg-[#fbf3e4] opacity-0" />}
           {stolen && (
@@ -606,7 +661,7 @@ function Flag({ t, color, rawr }: { t: number; color: string; rawr: boolean }) {
             fx.shake()
             discover('partyRawr')
           }}
-          className="pointer-events-auto relative block w-full touch-manipulation"
+          className="hit pointer-events-auto relative block w-full touch-manipulation"
         >
           <span className="block aspect-[1/1.15] w-full [clip-path:polygon(0_0,100%_0,50%_100%)]" style={{ background: color }} />
           <span className="absolute inset-x-0 top-[6%] text-center font-hand leading-none text-ink/45 transition-colors" style={{ fontSize: 'calc(var(--u) * .1)', color: roar ? '#fff' : undefined }}>
@@ -638,7 +693,7 @@ function Speaker() {
             say(hit === 0 ? 'turn it down.' : 'no. turn it UP.', 2200)
             discover('partyBmth')
           }}
-          className="block w-full touch-manipulation outline-offset-4"
+          className="hit block w-full touch-manipulation outline-offset-4"
         >
           <div key={hit} className="relative aspect-[3/4] rounded-md border-2 border-[#050308] bg-[#17101c] shadow-lg" style={{ animation: hit ? 'rattle .4s ease-in-out 2' : undefined }}>
             <span className="absolute left-1/2 top-[16%] block aspect-square w-[34%] -translate-x-1/2 rounded-full border-2 border-[#33243e]" />

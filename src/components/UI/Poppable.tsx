@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { playSound } from '../../audio/useSound'
+import { haptic } from '../../hooks/useTouch'
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 interface Props {
@@ -58,6 +59,7 @@ export function Poppable({
   const click = () => {
     count.current += 1
     playSound('pop')
+    haptic(6)
     if (lines.length) show(lines[Math.min(count.current - 1, lines.length - 1)] ?? lines[(count.current - 1) % lines.length])
     onPop?.(count.current)
   }

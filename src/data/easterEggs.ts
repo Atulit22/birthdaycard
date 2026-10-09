@@ -92,7 +92,7 @@ export const eggText = {
   houseKnock: ['*knock*', '*knock knock*', "...we're closed!", '...who is it?', "...oh. it's you.", 'come in. quietly.'],
   note: ['a tiny note', 'where the tree meets the grass,', 'something small is holding its breath.', '(say hi. or do not. the cat will.)'],
   book: ['FIELD NOTES, vol. 1', 'everything I noticed about Ishita.', '(this book fills itself in. only the true things go in.)'],
-  gateCat: ['...', '(is the lamp staring at me?)', 'it is just a lamp. I checked.'],
+  gateCat: ['meow.', '(is the lamp staring at me?)', 'it is just a lamp. I checked.'],
   gateLamp: ['careful. it is hot.', 'hey.', 'stop poking the lamp.', 'it flickers when it is nervous.', 'okay. okay. it is fine.'],
   ticket: ['VALID', 'forever', 'no refunds ♡'],
   idle: '...are you still there?',

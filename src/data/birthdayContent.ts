@@ -47,6 +47,8 @@ export const content = {
     line3: 'A tiny world, made just for you.',
     hidden: "I hid a few things along the way too... let's see if you can find them all 👀",
     skip: 'skip',
+    hintTap: 'psst... tap the cat 👀',
+    hintClick: 'psst... try clicking the cat 👀',
     button: 'come inside →',
   },
 
@@ -237,8 +239,24 @@ export const content = {
   },
 
   afterVideo: {
-    lines: ['I hope you love your little movie.', 'Okay... I have one more thing.'],
-    button: 'Follow the cat ✦',
+    lines: ['I hope you love your little movie.', "That's the whole world. thank you for exploring it."],
+    button: 'Take me back to the beginning ↑',
+  },
+
+  // little nudges: the cat whispers one of these if she lingers in a place without finding anything. (no "click everything" — just a raised eyebrow)
+  hints: {
+    town: 'there might be more here... look up. look down. 👀',
+    corner: 'that lamp looks suspicious. just saying.',
+    scrapbook: 'did you notice the tape? 👀',
+    party: "everyone's busy... maybe poke someone.",
+    final: 'the cat looks like it wants something.',
+    turtle: 'psst... check the flags 👀',
+  },
+  // what the people at the party say when you poke them
+  partyTalk: {
+    ishu: ['hehe.', 'okay okay, I see you all.', 'wait... is that envelope for me? 👀', 'go on. open it.'],
+    me: ['(I made all this. it took a while. shh.)', 'she is laughing. worth it.', 'psst. look at the table.'],
+    rock: ["it's a rock.", '(a very happy rock.)'],
   },
 
   final: {
@@ -255,12 +273,29 @@ export const content = {
     ],
     // the letter on the party table (Area 08). Paragraphs are `letter` above (the first line, "Dear Ishita,", is replaced by this greeting)
     letterGreeting: 'Hey Ishu,',
-    letterPs: 'P.S. everyone at the party is here because of you. I only built the invitation. (and yes, a few things are still hiding. keep looking.)', // ✏️
-    letterSign: '— from the guy who made all this for you ❤️',
+    // ✏️ the letter on the party table. One string = one paragraph. Make it yours.
+    letterParagraphs: [
+      "If you're reading this, then I guess you really did go looking around.",
+      'I wanted to leave this here because some things are easier to put in a little letter than in a normal birthday message.',
+      'I know this whole thing probably looks a bit silly from the outside. A tiny world, a cat, a turtle, a guy hanging from the lights, way too many little details nobody asked for.',
+      "But I didn't want your birthday to be just a message on a screen. I wanted to make you something you could wander around in. Something that would make you smile when you tapped the wrong thing and found something instead. Something that quietly says: someone spent time thinking about what would make you happy.",
+      "I don't know if you found every little secret in here. Honestly, I kind of hope you didn't. I like that there are still a few things waiting for you.",
+      'But mostly I hope you had fun. That you laughed at least once. That one of the dumb little easter eggs got you.',
+      'And that, even for a little while, this tiny world made you feel as special as you are.',
+      'Because you are.',
+      'Happy Birthday, Ishu.',
+      "I hope this year gives you a lot of reasons to smile, a few moments you'll want to keep forever, and people who make you feel as appreciated as you deserve.",
+      'And thank you for being you.',
+    ],
+    letterSign: 'your homeboy, Atulit :>',
     letterTag: 'for Ishu',
-    letterClose: 'fold it back ↩',
+    letterClose: 'fold it away ↩',
     signoff: 'Happy Birthday, Ishita ❤️',
     rawr: 'rawr.',
+    // the epilogue: a quiet pause between the party and the movie
+    quiet: ['the party is still going, somewhere out there.', "but it's quiet here."],
+    cue: 'one last little thing... 🎬',
+    partyCue: 'stay a little longer ✦',
     wishPrompt: 'one more thing — make a wish, then blow out the candle',
     wishDone: 'wish received. I will not tell anyone.',
     // {n} gets replaced with the number of secrets she found

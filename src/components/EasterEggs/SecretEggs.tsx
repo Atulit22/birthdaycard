@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { playSound } from '../../audio/useSound'
+import { content } from '../../data/birthdayContent'
 import { eggText } from '../../data/easterEggs'
 import { fx } from '../../fx'
 import { usePrefersReducedMotion } from '../../hooks/useCursor'
@@ -10,6 +11,9 @@ import { pos, type Pos } from '../BirthdayWorld/spot'
 
 /* The second layer of secrets. None of these have a "click me" hint on purpose.
    Documented (for the developer only) in docs/EASTER_EGGS.md. */
+
+/** places where the cat has already dropped a hint this visit */
+const hinted = new Set<string>()
 
 const paper = 'rounded-lg bg-paper px-3 py-2 text-center text-ink shadow-2xl'
 
@@ -225,7 +229,7 @@ export function SecretBook() {
         }}
         className="mb-0.5 block touch-manipulation rounded-sm outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
       >
-        <span className="flex h-11 w-6 items-center justify-center rounded-[2px] border border-[#1b0f26] bg-[#2f5a47] shadow-md">
+        <span className="flex h-11 w-6 items-center justify-center rounded-[2px] border border-[#1b0f26] bg-[#2f5a47] shadow-md" style={{ animation: 'nudge 9s ease-in-out 4s infinite' }}>
           <span className="rotate-90 whitespace-nowrap font-display text-[6px] uppercase tracking-[.15em] text-gold/80">field notes</span>
         </span>
       </button>
@@ -267,7 +271,9 @@ export function Doodles() {
  *  · "return" — after the movie, scroll back to the very first scene.
  */
 export function SecretWatchers() {
-  const { entered, discover, found, finalUnlocked } = useWorld()
+  const { entered, discover, found, finalUnlocked, say } = useWorld()
+  const foundCount = useRef(found.length)
+  foundCount.current = found.length
 
   useEffect(() => {
     if (!entered || found.includes('idle')) return
@@ -286,6 +292,40 @@ export function SecretWatchers() {
       window.clearInterval(iv)
     }
   }, [entered, found, discover])
+
+  // a raised eyebrow, never a tutorial: if she lingers somewhere new without finding anything, the cat says a small thing (once per place)
+  useEffect(() => {
+    if (!entered) return
+    const ids = ['town', 'corner', 'scrapbook', 'party', 'final']
+    let cur = ''
+    let timer = 0
+    const check = () => {
+      const mid = window.innerHeight * 0.5
+      let now = ''
+      for (const id of ids) {
+        const r = document.getElementById(id)?.getBoundingClientRect()
+        if (r && r.top <= mid && r.bottom > mid) now = id
+      }
+      if (now === cur) return
+      cur = now
+      window.clearTimeout(timer)
+      const text = (content.hints as Record<string, string>)[now]
+      if (!text || hinted.has(now)) return
+      const before = foundCount.current
+      timer = window.setTimeout(() => {
+        if (foundCount.current === before && !document.hidden) {
+          hinted.add(now)
+          say(text, 4800)
+        }
+      }, 10000)
+    }
+    window.addEventListener('scroll', check, { passive: true })
+    check()
+    return () => {
+      window.removeEventListener('scroll', check)
+      window.clearTimeout(timer)
+    }
+  }, [entered, say])
 
   useEffect(() => {
     if (!finalUnlocked || found.includes('return')) return

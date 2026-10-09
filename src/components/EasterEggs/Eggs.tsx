@@ -77,7 +77,7 @@ export function MysteryPresent({ className = '', style }: { className?: string; 
           <div
             key={shaking}
             className="relative z-10"
-            style={{ animation: stage === 1 ? 'rattle .5s ease-in-out 3' : undefined, transformOrigin: '50% 100%' }}
+            style={{ animation: stage === 1 ? 'rattle .5s ease-in-out 3' : stage === 0 ? 'nudge 8s ease-in-out 2s infinite' : undefined, transformOrigin: '50% 100%' }}
           >
             <Present size={86} box="#2b1a3a" lid="#1b0f26" ribbon="#b3202f" open={stage === 2} />
             {stage === 0 && (
@@ -193,7 +193,9 @@ export function Lanterns({ spots }: { spots: Pos[] }) {
             }
           }}
         >
-          <Lantern lit={lit[i]} size={60} />
+          <span className="block" style={{ animation: lit[i] ? undefined : `nudge 9s ease-in-out ${i * 2.5}s infinite` }}>
+            <Lantern lit={lit[i]} size={60} />
+          </span>
         </Poppable>
       ))}
     </>

@@ -36,7 +36,7 @@ The journal: tap the tiny green book on the cosy-corner shelf → the "discoveri
 | 17 | `mouse` | The mouse | Town island 2, tiny hole left of the rawr/grass | tap the hole **after reading the note** (hole glows gold) | Hard | 🐭 pops out: "NOT TODAY." + chord | **B3** (end) |
 | 18 | `resident` | Somebody IS home | Town island 3, the little house | knock 6× (3rd knock lights the window, `house`) | Hard | "who is it?… come in. quietly." + chord | extends existing `house` |
 | 19 | `moonLetter` | A letter from the moon | Welcome scene, the moon | after `dream`: tap the glowing moon | Hard | a small letter from the moon + chord | **A3** (end) |
-| 20 | `ps` | P.S. | Final scene, the gold "rawr." under the sign-off | tap 3× | Hard | a P.S. appears: "look at the cat." | **C1** → ending |
+| 20 | `ps` | P.S. | Epilogue, the gold "rawr." | tap 3× | Hard | a P.S. appears: "look at the cat." | **C1** → ending |
 | 21 | `squirtle` | Squirtle squad | anywhere (keyboard) | type `squirtle` | How-did-you-find-that | water-splash confetti + sound | – |
 | 23 | `cake` | The first wish | Welcome scene, the cake under "Happy Birthday, Ishu" | tap the cake | Easy | candles flare, cake bounces, music-box Happy Birthday (~15s, cannot overlap itself), floating notes | – |
 | 24 | `catEmergency` | Emergency level: maximum | Scrapbook, yellow "Black Cat Emergency" card | tap the cat 5× | Easy | cat speech bubbles, then a cat rain | – |
@@ -50,7 +50,7 @@ The journal: tap the tiny green book on the cosy-corner shelf → the "discoveri
 | 32 | `partyBmth` | Turn it up | Area 08, the small speaker with a BMTH sticker | tap it | Medium | a low guitar chug, "turn it down. no. turn it UP." | – |
 | 33 | `partyReyna` | Dismissed | Area 08, a faint purple orb in the sky | tap it | Hard | the eye closes with a little sound | – |
 | 34 | `gateCat` | Under the lamp | Landing scene, the cat under the streetlamp | tap the cat 3× | Medium | it eyes the lamp (the lamp flickers), mutters "it is just a lamp. I checked." | – |
-| 22 | `ending` | The actual last thing | Final scene, the cat | blow out the candle, find the P.S., then tap the (sleeping) cat | How-did-you-find-that | a small card slides out: "the actual last thing…" + chord | **C2** (end) |
+| 22 | `ending` | The actual last thing | Epilogue, the cat | find the P.S. first (tap "rawr." 3×), then tap the cat | How-did-you-find-that | a small card slides out: "the actual last thing…" + chord | **C2** (end) |
 
 Tooltips (hover only, not tracked): area labels 02/03/04 have a `title` that hints at the balloons, the grass/tree
 riddle, and "knock louder".
@@ -79,7 +79,7 @@ riddle, and "knock louder".
 | `wishes` | Wishing stars | Town | catch 5 shooting stars | Medium |
 | `sleepy` | Do not wake the cat | Cosy corner | tap the cat 3× | Easy |
 | `popcorn` | Popcorn thief | Cinema | tap the popcorn 3× | Easy |
-| `wish` | A wish | Final scene | blow out the candle | Easy |
+| `wish` | A wish | Area 08 party, the cake on the table | tap the cake (the candles go out, then relight themselves) | Easy |
 
 Totals: 13 original + 34 new = 47 secrets (rows 23-27: cake + scrapbook; rows 28-33: the party scene).
 
@@ -91,4 +91,10 @@ a little over the 5/7/5/2 target.)
 
 ## The letter (Area 08)
 
-A small envelope (tag: "for Ishu") leans on the cake at the party. It glows softly after the celebration until it has been opened once. Tap it: the party blurs/darkens and its music drops to a whisper (`setPartyLevel(4)`), the envelope lifts toward the camera, opens, and the letter unfolds. Text: `content.final` → `letterGreeting`, `letter` (the first line, "Dear Ishita,", is skipped), `letterPs`, `letterSign`. Close with the button, Esc, or by tapping outside: the party comes back with a fresh cheer and confetti. The old letter card in the epilogue (after the movie) was removed so the letter is not shown twice; the epilogue now only has the envelope, sign-off and the candle.
+A small envelope (tag: "for Ishu") leans on the cake at the party. It glows softly after the celebration until it has been opened once. Tap it: the camera leans toward the envelope, the party blurs/darkens and its music drops to a whisper (`setPartyLevel(4)`), the envelope lifts off the table, opens, and the paper unfolds. The page is NEVER scroll-locked (an earlier version added an `html.locked` class, which sets `overflow:hidden; height:100%` and threw the scroll back to the top). Text: `content.final` → `letterGreeting`, `letterParagraphs`, `letterSign`. Close with the button, Esc, or by tapping outside; the party carries on with a fresh cheer and confetti.
+
+## Flow / hints (current)
+
+landing → Area 01 (cake + song) → 02–07 → Area 08 party (+ letter) → **epilogue (quiet, no cake)** → movie → "take me back to the beginning". The epilogue now sits *before* the movie and is no longer gated. The party cue button says "stay a little longer ✦" and scrolls to the epilogue; the epilogue button "one last little thing... 🎬" scrolls to the movie.
+
+Hints: if she lingers ~10s in town / corner / scrapbook / party / epilogue without finding anything, the whisper cat says one line from `content.hints` (once per place per visit). In the party, tapping Ishu / me / the rock gives lines (`content.partyTalk`); Ishu's third tap points at the envelope. 9s after the big moment, the turtle suggests checking the flags if `partyRawr` is not found yet. Tiny "nudge" wiggles (every ~8s) mark the mystery present, unlit lanterns and the tiny book. Haptics (a very short vibrate) fire on discoveries and pops where the browser allows it.

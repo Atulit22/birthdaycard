@@ -18,7 +18,7 @@ import { ScrapbookSection } from './sections/Scrapbook/ScrapbookSection'
 import { useWorld } from './state/DiscoveryContext'
 
 export default function App() {
-  const { entered, finalUnlocked } = useWorld()
+  const { entered } = useWorld()
 
   // Always start at the top, and keep the page still until she presses "Go explore".
   useEffect(() => {
@@ -49,8 +49,8 @@ export default function App() {
         <IshitaCorner />
         <ScrapbookSection />
         <PartyScene />
+        <FinalMessage />
         <Cinema />
-        {finalUnlocked && <FinalMessage />}
       </motion.main>
 
       <SoundScape />

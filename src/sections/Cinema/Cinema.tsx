@@ -80,7 +80,7 @@ export function Cinema() {
   const follow = () => {
     playSound('whoosh')
     unlockFinal()
-    window.setTimeout(() => document.getElementById('final')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }), 120)
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }), 120)
   }
 
   const cin = content.cinema

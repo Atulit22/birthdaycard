@@ -18,7 +18,7 @@ export function TableEnvelope({ glow, onOpen }: { glow: boolean; onOpen: (rect: 
       type="button"
       aria-label={`a small envelope, ${f.letterTag}`}
       onClick={() => ref.current && onOpen(ref.current.getBoundingClientRect())}
-      className="group relative block w-full -rotate-[6deg] touch-manipulation outline-offset-4 transition-transform hover:-translate-y-1 hover:rotate-[-3deg] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+      className="hit group relative block w-full -rotate-[6deg] touch-manipulation outline-offset-4 transition-transform hover:-translate-y-1 hover:rotate-[-3deg] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
     >
       {glow && <span aria-hidden className="pointer-events-none absolute -inset-[45%] rounded-full bg-[radial-gradient(closest-side,rgba(255,226,160,.55),transparent)]" style={{ animation: 'glowpulse 2.6s ease-in-out infinite' }} />}
       <svg viewBox="0 0 80 58" className="relative w-full drop-shadow-[0_3px_3px_rgba(0,0,0,.45)]" aria-hidden>
@@ -39,7 +39,7 @@ export function TableEnvelope({ glow, onOpen }: { glow: boolean; onOpen: (rect: 
 function Sheet({ onClose }: { onClose: () => void }) {
   const f = content.final
   const reduced = usePrefersReducedMotion()
-  const paragraphs = f.letter.slice(1)
+  const paragraphs = f.letterParagraphs
   const closeBtn = useRef<HTMLButtonElement>(null)
   useEffect(() => closeBtn.current?.focus({ preventScroll: true }), [])
   const line = (i: number) => ({
@@ -50,7 +50,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
   return (
     <div className="relative w-[min(92vw,540px)]" onClick={(e) => e.stopPropagation()}>
       <div
-        className="relative max-h-[82svh] overflow-y-auto overscroll-contain rounded-[3px] px-7 pb-8 pt-9 text-ink shadow-[0_2px_2px_rgba(0,0,0,.3),0_30px_70px_-10px_rgba(0,0,0,.85)] sm:px-11"
+        className="relative max-h-[80svh] touch-pan-y overflow-y-auto overscroll-contain rounded-[3px] px-7 pb-8 pt-9 text-ink shadow-[0_2px_2px_rgba(0,0,0,.3),0_30px_70px_-10px_rgba(0,0,0,.85)] sm:px-11"
         style={{ background: RULED }}
         role="dialog"
         aria-label="a handwritten letter"
@@ -78,10 +78,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
               {p}
             </motion.p>
           ))}
-          <motion.p {...line(paragraphs.length + 1)} className="mt-[32px] font-hand text-[1.35rem] leading-[32px] text-ink/70">
-            {f.letterPs}
-          </motion.p>
-          <motion.p {...line(paragraphs.length + 2)} className="mt-[32px] text-right font-hand text-[1.7rem] leading-[32px] text-wine">
+          <motion.p {...line(paragraphs.length + 1)} className="mt-[32px] text-right font-hand text-[1.7rem] leading-[32px] text-wine">
             {f.letterSign}
           </motion.p>
         </div>
